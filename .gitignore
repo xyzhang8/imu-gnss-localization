@@ -1,0 +1,26 @@
+# Data: NavINST bags are several GB. Only the download instructions are tracked.
+data/*
+!data/README.md
+*.bag
+*.db3
+*.parquet
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Editors and OS
+.DS_Store
+.vscode/
+
+*.duckdb
+*.duckdb.wal
+# Private working context, not for publication
+CLAUDE.md
+context.md

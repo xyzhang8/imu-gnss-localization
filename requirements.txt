@@ -1,0 +1,10 @@
+numpy
+scipy
+pandas
+pyarrow
+duckdb
+pyyaml
+rosbags
+pymap3d
+matplotlib
+pytest
