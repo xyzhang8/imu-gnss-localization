@@ -8,3 +8,4 @@ rosbags
 pymap3d
 matplotlib
 pytest
+ipykernel
