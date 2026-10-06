@@ -295,8 +295,17 @@ def apply_lever_arm(
     Notes
     -----
     Deferred because it needs a heading estimate, so it cannot run before dead
-    reckoning exists. Take the true offset from
-    ``data/raw/CalibrationData/setup_transformations_1.txt`` rather than
-    fitting it from the data.
+    reckoning exists.
+
+    The dataset's published calibration does **not** give the offset needed
+    here. ``setup_transformations_1.txt`` lists ``KVH -> XSENS`` (the IMU unit)
+    and ``KVH -> PWRPAK7_ANTENNA``, which difference to 0.38 m, but the
+    MTi-670G uses a separate external GNSS antenna with no entry in the file.
+
+    Fitted from Urban04 instead, by rotating the GNSS error into the body
+    frame over the samples above 2 m/s: **1.34 m backward, 0.20 m left**.
+    Checked against speed to rule out a pure timestamp lag, which would grow
+    with speed where a lever arm does not; the fit is ``-0.053 * speed - 1.34``,
+    so mostly geometry plus a minor 53 ms timing component.
     """
     raise NotImplementedError
