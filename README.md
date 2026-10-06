@@ -1,8 +1,21 @@
 # Robust Vehicle Localization Through GNSS Outages<br><sup>*EKF vs UKF Fusion of IMU, GNSS and Wheel Odometry*</sup>
 
-Ground vehicles such as cars, automated guided vehicles (AGVs) and mobile robots depend on the Global Navigation Satellite System (GNSS) to know where they are. Drive into a dense city and that reliability breaks down. Buildings block satellites, signals arrive only after bouncing off facades, and the receiver can report a position that is confidently wrong by tens of metres before it stops reporting at all. What is left is an inertial measurement unit and a wheel odometer, whose small errors compound into tens of metres within a minute.
+Ground vehicles such as cars, automated guided vehicles (AGVs) and mobile robots
+depend on the Global Navigation Satellite System (GNSS) to know where they are.
+Most of the time it simply works: on open roads a consumer receiver holds position
+to a metre or two, continuously. The difficulty is that this depends entirely on
+the surroundings, and changes without warning. Move between tall buildings, under
+a bridge, or into a garage, and satellites are blocked, signals arrive only after
+bouncing off facades, and the receiver can report a position that is confidently
+wrong well before it stops reporting at all. Of the three sequences used here, two
+show no degradation at all; in the third the fix is missing for 98% of the run.
+
+When GNSS goes, what is left is an inertial measurement unit and a wheel odometer,
+whose errors compound quickly once there is nothing to correct them.
 
 This project asks how far and how long a vehicle can hold an accurate position once GNSS degrades or drops out. And a second question that matters just as much: does the filter's own uncertainty stay honest while it does?
+
+A note on what is being claimed. While GNSS is available, the filter does not beat a raw GNSS fix by much on position, and it is not meant to. The claim is narrower and harder: that position stays usable once the fix degrades or stops, and that the uncertainty the filter reports still describes the error it is actually making.
 
 ## Status
 
