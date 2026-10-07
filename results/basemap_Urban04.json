@@ -1,0 +1,17 @@
+{
+  "sequence": "Urban04",
+  "extent_enu": [
+    -1108.8155800217448,
+    1085.3389784883175,
+    -1005.6660439245661,
+    743.5997958112239
+  ],
+  "zoom": 16,
+  "origin": {
+    "lat": 44.2385078473,
+    "lon": -76.5004042101,
+    "alt": 66.2978210449
+  },
+  "provider": "Esri.WorldGrayCanvas",
+  "attribution": "Tiles (C) Esri -- Esri, DeLorme, NAVTEQ"
+}
