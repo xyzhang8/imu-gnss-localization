@@ -15,11 +15,11 @@ __pycache__/
 # Notebooks
 .ipynb_checkpoints/
 
-# Held back until the Discuss sections are answered. 04 derives the dead-reckoning
-# model and is worth publishing once finished; 05 is a scratchpad whose plotting
-# code now lives in scripts/make_e1_figure.py, so nothing depends on it.
-notebooks/04_dead_reckoning.ipynb
-notebooks/05_e1_figure.ipynb
+# Working notebooks, kept local until they are written up. 01 and 02 hold the
+# evidence for the dataset pivot and go back in after a trim; 04 derives the
+# dead-reckoning model and needs its discussion sections written; 05 is a
+# scratchpad whose plotting code now lives in scripts/make_e1_figure.py.
+notebooks/
 
 # Editors and OS
 .DS_Store
