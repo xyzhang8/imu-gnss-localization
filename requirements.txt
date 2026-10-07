@@ -9,3 +9,9 @@ pymap3d
 matplotlib
 pytest
 ipykernel
+
+# Optional, deliberately left commented out: it pulls in rasterio and friends.
+# Only scripts/fetch_basemap.py needs it, and only to download the street map
+# once. The cached image is committed, so every figure reproduces without this
+# installed and without a network connection.
+# contextily
