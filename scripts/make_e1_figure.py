@@ -53,6 +53,7 @@ STYLE = {
     "inertial": {"color": "#E69F00", "lw": 1.2, "label": "IMU only"},
     "start": {"color": "#CC79A7", "ms": 11, "mew": 2.0},
     "window": {"color": "#CC79A7", "alpha": 0.10},
+    "basemap_alpha": 0.7,
     "figsize": (11.0, 9.0),
     "anim_figsize": (6.5, 6.5),
     "dpi": 200,
@@ -120,7 +121,43 @@ def load_e1(sequence: str = "Urban04") -> dict:
     }
 
 
-def plot_e1(data: dict, style: dict | None = None) -> plt.Figure:
+def read_basemap(sequence: str, results: Path | None = None):
+    """Load the cached street map and its extent in the local ENU frame.
+
+    Written once by ``scripts/fetch_basemap.py`` and committed, so reading it
+    needs neither a network connection nor ``contextily``.
+
+    Parameters
+    ----------
+    sequence : str
+        Sequence the map was fetched for.
+    results : Path or None
+        Where to look. Defaults to ``results/``.
+
+    Returns
+    -------
+    image, extent : np.ndarray and list of float, or (None, None)
+        ``(None, None)`` when the cache is absent, so callers can carry on
+        without it rather than failing.
+    attribution : str or None
+        The credit the tile provider requires, to be drawn on the figure.
+    """
+    results = Path(results) if results is not None else REPO / "results"
+    image_path = results / f"basemap_{sequence}.png"
+    meta_path = results / f"basemap_{sequence}.json"
+    if not (image_path.exists() and meta_path.exists()):
+        return None, None, None
+
+    meta = json.loads(meta_path.read_text())
+    return mpimg.imread(image_path), meta["extent_enu"], meta["attribution"]
+
+
+def plot_e1(
+    data: dict,
+    style: dict | None = None,
+    basemap: bool = True,
+    results: Path | None = None,
+) -> plt.Figure:
     """Three panels: the trajectories at both scales, and the error over time.
 
     Parameters
@@ -129,10 +166,21 @@ def plot_e1(data: dict, style: dict | None = None) -> plt.Figure:
         From :func:`load_e1`.
     style : dict or None
         Overrides :data:`STYLE`. Only the keys you pass are replaced.
+    basemap : bool
+        Draw the cached street map under panel (b). Skipped silently if the
+        cache is missing, so the figure still builds on a bare clone.
+    results : Path or None
+        Where to look for the cached basemap. Defaults to ``results/``.
 
     Returns
     -------
     plt.Figure
+
+    Notes
+    -----
+    Only panel (b) gets the map. Panel (a) spans 17 km, where the cached tiles
+    would cover a small patch in the middle and the streets would be unreadable
+    at that zoom anyway.
     """
     s = {**STYLE, **(style or {})}
     tl, odo, ins = data["timeline"], data["odometer"], data["inertial"]
@@ -152,9 +200,22 @@ def plot_e1(data: dict, style: dict | None = None) -> plt.Figure:
     ax["full"].set_title("(a) full scale")
 
     # (b) zoomed to the route, where the two tracks separate visibly
+    if basemap:
+        image, extent, credit = read_basemap(data["sequence"], results)
+        if image is not None:
+            ax["zoom"].imshow(image, extent=extent, alpha=s["basemap_alpha"], zorder=0)
+            ax["zoom"].text(0.99, 0.01, credit, transform=ax["zoom"].transAxes,
+                            ha="right", va="bottom", fontsize=5, color="0.35")
     for name, df in (("reference", tl.rename(columns={"ref_east": "east", "ref_north": "north"})),
                      ("odometer", odo)):
-        ax["zoom"].plot(df["east"], df["north"], **s[name])
+        ax["zoom"].plot(df["east"], df["north"], zorder=3, **s[name])
+    # imshow would stretch the panel to the whole cached tile area, which is
+    # larger than the route, so the limits come from the tracks instead.
+    east = np.r_[tl["ref_east"], odo["east"]]
+    north = np.r_[tl["ref_north"], odo["north"]]
+    pad = 0.04 * max(np.ptp(east), np.ptp(north))
+    ax["zoom"].set_xlim(east.min() - pad, east.max() + pad)
+    ax["zoom"].set_ylim(north.min() - pad, north.max() + pad)
     ax["zoom"].set_title("(b) route, zoomed")
 
     # The route closes to within 0.31 m, so one marker is both start and end.
@@ -292,15 +353,11 @@ def animate_run(
 
     credit = None
     if basemap:
-        image_path = results / f"basemap_{data['sequence']}.png"
-        meta_path = results / f"basemap_{data['sequence']}.json"
-        if image_path.exists() and meta_path.exists():
-            meta = json.loads(meta_path.read_text())
-            ax.imshow(mpimg.imread(image_path), extent=meta["extent_enu"],
-                      alpha=basemap_alpha, zorder=0)
-            credit = meta["attribution"]
+        image, extent, credit = read_basemap(data["sequence"], results)
+        if image is not None:
+            ax.imshow(image, extent=extent, alpha=basemap_alpha, zorder=0)
         else:
-            print(f"no cached basemap at {image_path}; "
+            print(f"no cached basemap for {data['sequence']}; "
                   "run scripts/fetch_basemap.py. Continuing without it.")
 
     if not trail_only:

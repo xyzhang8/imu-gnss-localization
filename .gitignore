@@ -30,3 +30,8 @@ notebooks/
 # Private working context, not for publication
 CLAUDE.md
 context.md
+
+# Drafts and parked prose. HTML comments in the README would not render on
+# GitHub, but the raw file is one click away, so anything not meant to be
+# published lives here instead.
+notes/
